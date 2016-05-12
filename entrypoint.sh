@@ -123,33 +123,33 @@ if [ -d "$MEDIAWIKI_SHARED" ]; then
 
 	# If the images directory only contains a README, then link it to
 	# $MEDIAWIKI_SHARED/images, creating the shared directory if necessary
-	if [ "$(ls images)" = "README" -a ! -L images ]; then
-		rm -fr images
-		mkdir -p "$MEDIAWIKI_SHARED/images"
-		ln -s "$MEDIAWIKI_SHARED/images" images
+	if [ -d "$MEDIAWIKI_SHARED/images" && "$(ls images)" = "README" ]; then
+                echo "Found 'images' folder in data volume, creating symbolic link."
+		rm /var/www/html/images
+		ln -s "$MEDIAWIKI_SHARED/images" /var/www/html/images
 	fi
 
 	# If an extensions folder exists inside the shared directory, as long as
 	# /var/www/html/extensions is not already a symbolic link, then replace it
-	if [ -d "$MEDIAWIKI_SHARED/extensions" -a ! -h /var/www/html/extensions ]; then
-		echo >&2 "Found 'extensions' folder in data volume, creating symbolic link."
-		rm -rf /var/www/html/extensions
+	if [ -d "$MEDIAWIKI_SHARED/extensions" ]; then
+		echo "Found 'extensions' folder in data volume, creating symbolic link."
+		rm /var/www/html/extensions
 		ln -s "$MEDIAWIKI_SHARED/extensions" /var/www/html/extensions
 	fi
 
 	# If a skins folder exists inside the shared directory, as long as
 	# /var/www/html/skins is not already a symbolic link, then replace it
-	if [ -d "$MEDIAWIKI_SHARED/skins" -a ! -h /var/www/html/skins ]; then
-		echo >&2 "Found 'skins' folder in data volume, creating symbolic link."
-		rm -rf /var/www/html/skins
+	if [ -d "$MEDIAWIKI_SHARED/skins" ]; then
+		echo "Found 'skins' folder in data volume, creating symbolic link."
+		rm /var/www/html/skins
 		ln -s "$MEDIAWIKI_SHARED/skins" /var/www/html/skins
 	fi
 
 	# If a vendor folder exists inside the shared directory, as long as
 	# /var/www/html/vendor is not already a symbolic link, then replace it
-	if [ -d "$MEDIAWIKI_SHARED/vendor" -a ! -h /var/www/html/vendor ]; then
-		echo >&2 "Found 'vendor' folder in data volume, creating symbolic link."
-		rm -rf /var/www/html/vendor
+	if [ -d "$MEDIAWIKI_SHARED/vendor" ]; then
+		echo "Found 'vendor' folder in data volume, creating symbolic link."
+		rm /var/www/html/vendor
 		ln -s "$MEDIAWIKI_SHARED/vendor" /var/www/html/vendor
 	fi
 
@@ -217,7 +217,7 @@ fi
 # migrate the database if necessary on container startup. It also will
 # verify the database connection is working.
 if [ -e "LocalSettings.php" -a $MEDIAWIKI_UPDATE = true ]; then
-	echo >&2 'info: Running maintenance/update.php';
+	echo 'info: Running maintenance/update.php';
 	php maintenance/update.php --quick --conf ./LocalSettings.php
 fi
 

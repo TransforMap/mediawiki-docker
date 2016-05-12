@@ -19,6 +19,7 @@ RUN set -x; \
         imagemagick \
         netcat \
         git \
+        curl \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/cache/apt/archives/* \
     && a2enmod rewrite \
@@ -52,7 +53,7 @@ COPY php.ini /usr/local/etc/php/conf.d/mediawiki.ini
 COPY apache/mediawiki.conf /etc/apache2/
 RUN echo "Include /etc/apache2/mediawiki.conf" >> /etc/apache2/apache2.conf
 
-COPY docker-entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 80 443
 ENTRYPOINT ["/entrypoint.sh"]
