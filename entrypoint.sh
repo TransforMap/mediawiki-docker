@@ -123,7 +123,7 @@ if [ -d "$MEDIAWIKI_SHARED" ]; then
 
 	# If the images directory only contains a README, then link it to
 	# $MEDIAWIKI_SHARED/images, creating the shared directory if necessary
-	if [ -d "$MEDIAWIKI_SHARED/images" && "$(ls images)" = "README" ]; then
+	if [ -d "$MEDIAWIKI_SHARED/images" -a $(ls images) = "README" ]; then
                 echo "Found 'images' folder in data volume, creating symbolic link."
 		rm /var/www/html/images
 		ln -s "$MEDIAWIKI_SHARED/images" /var/www/html/images
@@ -152,6 +152,11 @@ if [ -d "$MEDIAWIKI_SHARED" ]; then
 		rm /var/www/html/vendor
 		ln -s "$MEDIAWIKI_SHARED/vendor" /var/www/html/vendor
 	fi
+
+	if [ -e "$MEDIAWIKI_SHARED/favicon.ico" -a ! -e /var/www/html/favicon.ico ]; then
+		echo "Found no favicon, , creating symbolic link."
+    ln -s "$MEDIAWIKI_SHARED/favicon.ico" /var/www/html/favicon.ico
+  fi
 
 	# Attempt to enable SSL support if explicitly requested
 	if [ $MEDIAWIKI_ENABLE_SSL = true ]; then
@@ -227,5 +232,16 @@ mkdir -p images
 # Fix file ownership and permissions
 chown -R www-data: .
 chmod 755 images
+
+
+sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 200M/'  /etc/php5/apache2/php.ini
+sed -i 's/post_max_size = 8M/post_max_size = 420M/' /etc/php5/apache2/php.ini
+sed -i 's/memory_limit = 128M/memory_limit = 256M/' /etc/php5/apache2/php.ini
+sed -i 's/max_execution_time = 30/max_execution_time = 120/' /etc/php5/apache2/php.ini
+echo "php settings"
+grep upload_max_filesize /etc/php5/apache2/php.ini
+grep post_max_size /etc/php5/apache2/php.ini
+grep memory_limit /etc/php5/apache2/php.ini
+grep max_execution_time /etc/php5/apache2/php.ini
 
 exec "$@"

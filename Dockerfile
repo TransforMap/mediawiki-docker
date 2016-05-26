@@ -48,10 +48,12 @@ RUN set -x; \
     && git checkout $MEDIAWIKI_VERSION \
     && git submodule update --init
 
-COPY php.ini /usr/local/etc/php/conf.d/mediawiki.ini
+COPY apache/mediawiki.conf /etc/apache2/sites-available/
+RUN rm -rf /etc/apache2/sites-enabled/000-default.conf && \
+    ln -s /etc/apache2/sites-available/mediawiki.conf /etc/apache2/sites-enabled/mediawiki.conf
+#RUN echo "Include /etc/apache2/mediawiki.conf" >> /etc/apache2/apache2.conf
 
-COPY apache/mediawiki.conf /etc/apache2/
-RUN echo "Include /etc/apache2/mediawiki.conf" >> /etc/apache2/apache2.conf
+#COPY php.ini /etc/php5/conf.d/local.ini
 
 COPY entrypoint.sh /entrypoint.sh
 
