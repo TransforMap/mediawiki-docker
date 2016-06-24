@@ -24,6 +24,21 @@ RUN set -x; \
     # Remove the default Debian index page.
     && rm /var/www/html/index.html
 
+# Install mailsystem
+ENV DEBIAN_FRONTEND noninteractive
+RUN set -x; \
+  mkdir -p /etc/nullmailer \
+  && echo "base.transformap.co" > /etc/mailname \
+  && touch /etc/nullmailer/defaultdomain \
+  && echo "mapping@transformap.co" > /etc/nullmailer/adminaddr \
+  && echo "mail.ecobytes.net smtp" > /etc/nullmailer/remotes \
+  && chown mail:mail /etc/nullmailer/remotes \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
+    nullmailer \
+  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/cache/apt/archives/*
+
 # Waiting in antiticipation for built-time arguments
 # https://github.com/docker/docker/issues/14634
 ENV MEDIAWIKI_VERSION REL1_27
@@ -61,7 +76,8 @@ RUN for i in Wikibase UniversalLanguageSelector Babel cldr CategoryTree; do cd $
 #        && git submodule foreach 'git checkout $(MEDIAWIKI_VERSION) || :'
 WORKDIR /usr/src/mediawiki/skins
 RUN git submodule update --init --recursive \
-        && git submodule foreach 'git checkout -b $(MEDIAWIKI_VERSION) origin/$(MEDIAWIKI_VERSION) || :'
+        && git submodule foreach 'git checkout -b master origin/master || :'
+        #&& git submodule foreach 'git checkout -b $(MEDIAWIKI_VERSION) origin/$(MEDIAWIKI_VERSION) || :'
 
 WORKDIR /usr/src/mediawiki/
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \

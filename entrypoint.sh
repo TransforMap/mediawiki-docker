@@ -250,6 +250,8 @@ grep post_max_size /etc/php5/apache2/php.ini
 grep memory_limit /etc/php5/apache2/php.ini
 grep max_execution_time /etc/php5/apache2/php.ini
 
+/etc/init.d/nullmailer start
+
 if [ "$DEBUG" = "false" ]; then
 	exec 1>&3 3>&-
 	exec 2>&4 4>&-
