@@ -51,29 +51,35 @@ RUN set -x; \
         -b $MEDIAWIKI_VERSION \
         https://gerrit.wikimedia.org/r/p/mediawiki/core.git \
         /usr/src/mediawiki
+
 WORKDIR /usr/src/mediawiki
-RUN ls -la && ls extensions && ls skins
 RUN git clone --depth 1 https://gerrit.wikimedia.org/r/p/mediawiki/vendor.git
-RUN if [ -d "/usr/src/mediawiki/extensions" -a $(ls /usr/src/mediawiki/extensions) = "README" ]; then \
-  echo "extensions exists, removing" && rm -rf /usr/src/mediawiki/extensions/*; fi
-#RUN git clone --depth 1 https://gerrit.wikimedia.org/r/p/mediawiki/extensions.git
-RUN if [ -d "/usr/src/mediawiki/skins"  -a $(ls /usr/src/mediawiki/skins) = "README" ]; then \
-   echo "skins exists, removing" && rm -rf /usr/src/mediawiki/skins; fi
-RUN git clone --depth 1 https://gerrit.wikimedia.org/r/p/mediawiki/skins.git
-
-
 WORKDIR /usr/src/mediawiki/vendor
 RUN git submodule update --init --recursive \
         && git submodule foreach 'git checkout $(MEDIAWIKI_VERSION) || :'
-WORKDIR /usr/src/mediawiki/extensions
-RUN git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/Wikibase.git \
-  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/UniversalLanguageSelector.git \
-  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/Babel.git \
-  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/cldr.git \
-  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/CategoryTree.git
-RUN for i in Wikibase UniversalLanguageSelector Babel cldr CategoryTree; do cd $i; git checkout -b $(MEDIAWIKI_VERSION) origin/$(MEDIAWIKI_VERSION); cd ..; done
+
+#WORKDIR /usr/src/mediawiki/extensions
+
+#RUN if [ -d "/usr/src/mediawiki/extensions" -a $(ls /usr/src/mediawiki/extensions) = "README" ]; then \
+#  echo "extensions exists, removing" && rm -rf /usr/src/mediawiki/extensions/ && mkdir -p /usr/src/mediawiki/extensions/; fi
+#RUN git clone --depth 1 https://gerrit.wikimedia.org/r/p/mediawiki/extensions.git
+
+#RUN git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/Wikibase.git \
+#  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/UniversalLanguageSelector.git \
+#  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/Babel.git \
+#  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/cldr.git \
+#  && git clone https://gerrit.wikimedia.org/r/p/mediawiki/extensions/CategoryTree.git
+#RUN for i in Wikibase UniversalLanguageSelector Babel cldr CategoryTree; do cd $i; git checkout -b $(MEDIAWIKI_VERSION) origin/$(MEDIAWIKI_VERSION); cd ..; done
 #RUN git submodule update --init --recursive \
 #        && git submodule foreach 'git checkout $(MEDIAWIKI_VERSION) || :'
+
+WORKDIR /usr/src/mediawiki
+#RUN if [ -d "/usr/src/mediawiki/skins"  -a $(ls /usr/src/mediawiki/skins) = "README" ]; then \
+RUN if [ -d "/usr/src/mediawiki/skins" ]; then \
+   echo "skins exists, removing" && rm -rf /usr/src/mediawiki/skins; fi
+RUN git clone --depth 1 https://gerrit.wikimedia.org/r/p/mediawiki/skins.git
+# TODO only clone 'Vector', saves time on rebuild
+
 WORKDIR /usr/src/mediawiki/skins
 RUN git submodule update --init --recursive \
         && git submodule foreach 'git checkout -b master origin/master || :'
